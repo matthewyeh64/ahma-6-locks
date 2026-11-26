@@ -33,9 +33,9 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 <button id="iceok">開始闖關</button></div>
 <div class="card hidden" id="play">
 <div id="who" style="font-weight:700"></div><div class="mood"><i id="moodbar" style="width:20%"></i></div><div id="moodtxt" style="font-size:13px;color:#6b5a47"></div><div class="step" id="steps"></div>
-<div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div>
+<div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div><div class="hintbox" id="task" style="background:#fff8e8"></div>
 <input id="code" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="輸入密碼">
-<button id="send">送出</button><button class="hint" id="hintbtn">用 1 枚提示幣看提示</button><div class="hintbox hidden" id="hintbox"></div><div class="coins" id="coins"></div><div class="diary" id="diary"></div><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
+<button id="send">送出</button><button class="hint" id="hintbtn">用 1 枚提示幣看提示</button><button class="hint hidden" id="revbtn" style="background:#8a2f2f">時間到了，我們想看答案</button><div class="say hidden" id="revbox"></div><div class="hintbox hidden" id="hintbox"></div><div class="coins" id="coins"></div><div class="diary" id="diary"></div><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
 <div class="card hidden" id="done"><div class="big">全部通關！</div>
 <p style="text-align:center;font-size:18px">請派一位同學到寶箱前，主持人會給你們寶箱的密碼。</p>
 <div class="say" id="finalsay"></div><div id="badge" style="text-align:center;font-size:20px;font-weight:900;margin:8px 0"></div><table class="times" id="times"></table><div id="sync2" style="font-size:13px;color:#6b5a47;text-align:center"></div></div>
@@ -64,14 +64,20 @@ function load(){try{return JSON.parse(localStorage.getItem(key(grp)))||null}catc
 function save(){try{localStorage.setItem(key(grp),JSON.stringify(st))}catch(e){}}
 D.forEach((g,i)=>{const o=document.createElement("option");o.value=i;o.textContent=g.name;$("grp").appendChild(o)});
 $("grp").onchange=()=>{$("go").disabled=$("grp").value===""};
-$("go").onclick=()=>{grp=+$("grp").value;st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");showStart()};
-$("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));location.reload()}};
+$("go").onclick=()=>{grp=+$("grp").value;try{localStorage.setItem("ahma6_last",grp)}catch(e){}st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");showStart()};
+$("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));localStorage.removeItem("ahma6_last");location.reload()}};
 const QS=["今年過年，你最想吃的一道菜是什麼？","你家過年一定會有的一件事是什麼？","你最難忘的一次「回家」是什麼時候？","如果能帶一樣東西回家給阿嬤，你會帶什麼？","你在照顧別人時，最常說的一句話是什麼？","小時候過年，你最期待的是什麼？","今天誰是「最想早點回家」的人？","你覺得家裡最像「家」的味道是什麼？"];
 function showStart(){if(!st.ice&&st.lock===0)$("ice").classList.remove("hidden");else render()}
 $("qbtn").onclick=()=>{$("qbox").textContent=QS[Math.floor(Math.random()*QS.length)]};
 $("lbtn").onclick=()=>{const n=parseInt($("np").value);if(!n||n<2){$("lbox").textContent="請先輸入桌上有幾個人";return}$("lbox").textContent="抽到了！從你的左手邊算起，第 "+(Math.floor(Math.random()*n)+1)+" 位，是第一關的組長。"};
-$("iceok").onclick=()=>{const a=$("tn").value.trim(),b=$("ts").value.trim();if(a||b)report(D[grp].name,"組名："+a+"／口號："+b,0);st.ice=true;save();$("ice").classList.add("hidden");render()};
-function moodUI(){const m=Math.min(100,20+Math.round(st.lock*16));$("moodbar").style.width=m+"%";$("moodtxt").textContent="阿嬤的心情　"+(m>=100?"😊":m>=68?"🙂":m>=36?"😐":"😟")+"　"+m+"%";
+$("iceok").onclick=()=>{const a=$("tn").value.trim(),b=$("ts").value.trim();if(a||b)report(D[grp].name,"組名："+a+"／口號："+b,0);st.ice=true;st.lastT=Date.now();save();$("ice").classList.add("hidden");render()};
+const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音，8 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
+function taskUI(){$("task").textContent=TASKS[st.lock]}
+function revCheck(){if(!st||st.lock>=6||$("play").classList.contains("hidden"))return;const late=Date.now()-st.lastT>480000;
+ $("revbtn").classList.toggle("hidden",!late||st.revShown===st.lock);$("revbox").classList.toggle("hidden",st.revShown!==st.lock);if(st.revShown===st.lock)$("revbox").textContent="答案公布：密碼是 "+st.revCode+"。請照著輸入，再想想為什麼。"}
+$("revbtn").onclick=()=>{const n=st.lock==5?5:4;let found="";for(let i=0;i<Math.pow(10,n);i++){const c=String(i).padStart(n,"0");if(h(grp+1+"|"+(st.lock+1)+"|"+c)===D[grp].h[st.lock]){found=c;break}}
+ st.revShown=st.lock;st.revCode=found;report(D[grp].name,"看答案 "+NAMES[st.lock],0);save();revCheck()};
+function moodUI(){taskUI();const m=Math.min(100,20+Math.round(st.lock*16));$("moodbar").style.width=m+"%";$("moodtxt").textContent="阿嬤的心情　"+(m>=100?"😊":m>=68?"🙂":m>=36?"😐":"😟")+"　"+m+"%";
  $("coins").textContent="提示幣："+"🪙".repeat(st.coins)+(st.coins?"":"（用完了）");$("hintbtn").disabled=st.coins<1||st.hintShown===st.lock;$("hintbox").classList.toggle("hidden",st.hintShown!==st.lock);
  if(st.hintShown===st.lock)$("hintbox").textContent="提示："+HINTS[st.lock];
  $("diary").innerHTML=st.times.map((t,i)=>"<div>「"+SAYS[i]+"」</div>").join("")}
@@ -88,7 +94,7 @@ function render(){
  $("play").classList.remove("hidden");$("who").textContent=D[grp].name;$("title").textContent=NAMES[st.lock];
  $("steps").innerHTML=NAMES.map((n,i)=>'<div class="dot '+(i<st.lock?"done":i==st.lock?"on":"")+'">'+(i<5?i+1:"門")+"</div>").join("");
  moodUI();$("code").maxLength=st.lock==5?5:4;$("code").value="";$("msg").textContent="";$("msg").className="msg";tick();}
-let timer=null;window.addEventListener('online',flush);setInterval(()=>{setSync();$('sync2').textContent=$('sync').textContent},2000);flush();
+let timer=null;window.addEventListener('online',flush);setInterval(()=>{setSync();$('sync2').textContent=$('sync').textContent;revCheck()},2000);flush();
 function tick(){clearInterval(timer);const upd=()=>{const left=Math.ceil((st.lockedUntil-Date.now())/1000);
  if(left>0){$("send").disabled=true;$("code").disabled=true;$("send").textContent="請等 "+left+" 秒";}
  else{$("send").disabled=false;$("code").disabled=false;$("send").textContent="送出";clearInterval(timer)}};upd();timer=setInterval(upd,250)}
@@ -99,5 +105,6 @@ $("send").onclick=()=>{
   if(st.lock>=6){render();return}
   render();$("msg").innerHTML="通過！進到"+NAMES[st.lock]+'<div class="say">阿嬤說：「'+SAYS[st.lock-1]+'」</div>';$("msg").className="msg ok";if(st.lock===2)event();
  }else{st.wrong++;st.wrongAll=(st.wrongAll||0)+1;st.lockedUntil=Date.now()+COOL*1000;save();$("msg").textContent="密碼不對（第 "+st.wrong+" 次）。等 30 秒，大家再討論一下。";$("msg").className="msg bad";tick()}};
+try{const lg=localStorage.getItem("ahma6_last");if(lg!==null&&D[+lg]&&localStorage.getItem(key(+lg))){$("grp").value=lg;$("grp").onchange();$("go").click()}}catch(e){}
 $("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
 </script></body></html>
