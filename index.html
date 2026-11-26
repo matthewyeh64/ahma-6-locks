@@ -24,7 +24,10 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 
 </style></head><body><main>
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px"><img src="logo.png" alt="醫院標誌" style="height:44px;width:auto"><h1 style="margin:0">阿嬤的十道鎖</h1></div><p class="sub">輸入各關密碼。答錯要等 30 秒，大家重新討論一下再試。</p>
-<div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button></div>
+<div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button><div id="inapp" class="hidden" style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#fff4d6;font-size:15px">提醒：這個網頁是在 LINE 或掃描器裡打開的，關掉後可能會掉進度。建議按右上角「⋯」，選「用瀏覽器開啟」（Chrome 或 Safari）。</div>
+<details style="margin-top:12px"><summary style="font-size:15px;color:#555">進度不見了？（網頁被關掉或換手機）</summary>
+<p style="font-size:15px">先在上面選好組別，再選你們已經通過到第幾關，輸入<b>那一關的密碼</b>，就能從下一關接著玩。</p>
+<select id="rlock"></select><input id="rcode" inputmode="numeric" maxlength="8" placeholder="那一關的密碼" style="font-size:18px;margin-top:6px"><button id="rgo">接續進度</button><div id="rmsg" style="color:#b3261e;font-weight:700;margin-top:6px"></div></details></div>
 <div class="card hidden" id="ice"><div style="font-size:20px;font-weight:900">開場破冰（約 7 分鐘）</div>
 <p><b>1　自我介紹</b>　每人一句：「我是＿＿，我在＿＿，<b>我今天最想回家做的一件事是＿＿</b>。」</p>
 <button class="hint" id="qbtn">抽一個暖身問題</button><div class="say" id="qbox">按上面的按鈕抽題，每人回答一次。</div>
@@ -67,6 +70,15 @@ D.forEach((g,i)=>{const o=document.createElement("option");o.value=i;o.textConte
 $("grp").onchange=()=>{$("go").disabled=$("grp").value===""};
 $("go").onclick=()=>{grp=+$("grp").value;try{localStorage.setItem("ahma6_last",grp)}catch(e){}st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");showStart()};
 $("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));localStorage.removeItem("ahma6_last");location.reload()}};
+if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger|; wv\)/i.test(navigator.userAgent))$("inapp").classList.remove("hidden");
+NAMES.slice(0,10).forEach((n,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent="已經通過 "+n;$("rlock").appendChild(o)});
+let rUntil=0;
+$("rgo").onclick=()=>{if($("grp").value===""){$("rmsg").textContent="請先在上面選組別。";return}if(Date.now()<rUntil){$("rmsg").textContent="請等 "+Math.ceil((rUntil-Date.now())/1000)+" 秒再試。";return}
+ const g=+$("grp").value,j=+$("rlock").value,v=$("rcode").value.replace(/\D/g,"");
+ if(!v||!D[g].h[j-1].split(",").includes(h(g+1+"|"+j+"|"+v))){rUntil=Date.now()+COOL*1000;$("rmsg").textContent="這組密碼不對。請確認組別、關卡和密碼，30 秒後再試。";return}
+ grp=g;try{localStorage.setItem("ahma6_last",grp)}catch(e){}
+ const old=load();if(old&&old.lock>=j){st=old}else{st={lock:j,t0:Date.now(),times:Array(j).fill(null),lockedUntil:0,wrong:0,lastT:Date.now(),coins:old&&old.coins!=null?old.coins:3,hintShown:-1,evDone:j>=2,wrongAll:0,ice:true,resumed:true}}
+ save();$("pick").classList.add("hidden");render();$("msg").textContent="已接續進度，從"+NAMES[st.lock]+"開始。";$("msg").className="msg ok"};
 const QS=["今年過年，你最想吃的一道菜是什麼？","你家過年一定會有的一件事是什麼？","你最難忘的一次「回家」是什麼時候？","如果能帶一樣東西回家給阿嬤，你會帶什麼？","你在照顧別人時，最常說的一句話是什麼？","小時候過年，你最期待的是什麼？","今天誰是「最想早點回家」的人？","你覺得家裡最像「家」的味道是什麼？"];
 function showStart(){if(!st.ice&&st.lock===0)$("ice").classList.remove("hidden");else render()}
 $("qbtn").onclick=()=>{$("qbox").textContent=QS[Math.floor(Math.random()*QS.length)]};
@@ -89,7 +101,7 @@ function event(){if(st.evDone)return;st.evDone=true;save();$("evq").textContent=
  EVQ.o.forEach((t,i)=>{const b=document.createElement("button");b.textContent=String.fromCharCode(65+i)+"　"+t;b.onclick=()=>{[...$("evopts").children].forEach(x=>x.disabled=true);
   if(i===EVQ.a){st.coins++;$("evres").textContent="答對了！獎勵 1 枚提示幣。";$("evres").style.color="#1b7a3d"}else{$("evres").textContent="先不要移動她，確認意識和疼痛，再找人幫忙。這次沒有獎勵，但不扣分。";$("evres").style.color="#b3261e"}
   save();moodUI();const c=document.createElement("button");c.textContent="繼續";c.onclick=()=>$("ev").classList.add("hidden");$("evopts").appendChild(c)};$("evopts").appendChild(b)});$("ev").classList.remove("hidden")}
-function fmt(ms){const s=Math.round(ms/1000);return Math.floor(s/60)+" 分 "+(s%60)+" 秒"}
+function fmt(ms){if(ms==null)return "（前一次網頁）";const s=Math.round(ms/1000);return Math.floor(s/60)+" 分 "+(s%60)+" 秒"}
 function render(){
  if(st.lock>=11){$("play").classList.add("hidden");$("done").classList.remove("hidden");$("finalsay").textContent="阿嬤說：「"+SAYS[10]+"」";
   {const tot=st.times.reduce((a,b)=>a+b,0),w=st.wrongAll||0,used=3-st.coins+(st.evDone&&st.coins>3?0:0);$("badge").textContent=w===0?"🏅 稱號：零失誤的好家人":tot<20*60*1000?"🏅 稱號：飛毛腿回家隊":"🏅 稱號：一步一腳印的接力隊"}
