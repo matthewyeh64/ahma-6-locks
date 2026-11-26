@@ -24,7 +24,7 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 
 </style></head><body><main>
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px"><img src="logo.png" alt="醫院標誌" style="height:44px;width:auto"><h1 style="margin:0">阿嬤的十道鎖</h1></div><p class="sub">輸入各關密碼。答錯要等 30 秒，大家重新討論一下再試。</p>
-<div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button><div id="inapp" class="hidden" style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#fff4d6;font-size:15px">提醒：這個網頁是在 LINE 或掃描器裡打開的，關掉後可能會掉進度。建議按右上角「⋯」，選「用瀏覽器開啟」（Chrome 或 Safari）。</div>
+<div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button><div id="cbox2" class="hidden" style="margin-top:12px;padding:12px;border-radius:10px;background:#eaf6ee"><div id="cmsg" style="font-size:17px"></div><button id="cyes" style="background:#1b7a3d">接著玩</button><button class="ghost" id="cno" style="margin-top:10px">不要，從頭開始（試玩重來用）</button></div><div id="inapp" class="hidden" style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#fff4d6;font-size:15px">提醒：這個網頁是在 LINE 或掃描器裡打開的，關掉後可能會掉進度。建議按右上角「⋯」，選「用瀏覽器開啟」（Chrome 或 Safari）。</div>
 <details style="margin-top:12px"><summary style="font-size:15px;color:#555">進度不見了？（網頁被關掉或換手機）</summary>
 <p style="font-size:15px">先在上面選好組別，再選你們已經通過到第幾關，輸入<b>那一關的密碼</b>，就能從下一關接著玩。</p>
 <select id="rlock"></select><input id="rcode" inputmode="numeric" maxlength="8" placeholder="那一關的密碼" style="font-size:18px;margin-top:6px"><button id="rgo">接續進度</button><div id="rmsg" style="color:#b3261e;font-weight:700;margin-top:6px"></div></details></div>
@@ -68,7 +68,25 @@ function load(){try{return JSON.parse(localStorage.getItem(key(grp)))||null}catc
 function save(){try{localStorage.setItem(key(grp),JSON.stringify(st))}catch(e){}}
 D.forEach((g,i)=>{const o=document.createElement("option");o.value=i;o.textContent=g.name;$("grp").appendChild(o)});
 $("grp").onchange=()=>{$("go").disabled=$("grp").value===""};
-$("go").onclick=()=>{grp=+$("grp").value;try{localStorage.setItem("ahma6_last",grp)}catch(e){}st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");showStart()};
+const SHEET="https://docs.google.com/spreadsheets/d/1Yky0CeDeGu4co37ZuMp9pwtIzjbNiI7po1emVSzUVvI/gviz/tq?tqx=out:json&sheet="+encodeURIComponent("表單回覆 1");
+function cloud(name,cb){let done=false;const fin=x=>{if(!done){done=true;cb(x)}};setTimeout(()=>fin(null),7000);
+ fetch(SHEET+"&tq="+encodeURIComponent("select A,D,B where C='"+name+"' order by A")+"&t="+Date.now(),{credentials:"omit"}).then(r=>r.text()).then(t=>{
+  const j0=JSON.parse(t.slice(t.indexOf("(")+1,t.lastIndexOf(")")));const rows=(j0.table&&j0.table.rows||[]).map(r=>[r.c[0]&&r.c[0].v,r.c[1]&&r.c[1].v,r.c[2]&&r.c[2].v]);
+  let s=-1;rows.forEach((r,i)=>{if(r[1]===NAMES[0])s=i});if(s<0){fin({j:0});return}
+  const run=rows.slice(s);let j=0,last=null;const times=[],hints=run.filter(r=>String(r[1]).indexOf("提示")===0).length;
+  run.forEach(r=>{const i=NAMES.indexOf(r[1]);if(i>=0){times[i]=r[2]==null?null:r[2]*1000;if(i+1>j){j=i+1;last=r[0]}}});
+  let lt=Date.now();const m=/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/.exec(last||"");if(m){const d=new Date(+m[1],+m[2],+m[3],+m[4],+m[5],+m[6]).getTime();if(d<lt&&lt-d<6*3600000)lt=d}
+  for(let i=0;i<j;i++)if(times[i]===undefined)times[i]=null;fin({j:j,times:times,hints:hints,lastT:lt})}).catch(()=>fin(null))}
+let cloudRes=null;
+$("go").onclick=()=>{grp=+$("grp").value;try{localStorage.setItem("ahma6_last",grp)}catch(e){}
+ if(load()){begin();return}
+ $("go").disabled=true;$("go").textContent="查詢這組的進度…";
+ cloud(D[grp].name,res=>{$("go").disabled=false;$("go").textContent="開始";
+  if(res&&res.j>0){cloudRes=res;$("cmsg").innerHTML="成績表顯示 <b>"+D[grp].name+"</b> 已經通過到 <b>"+(res.j>=11?"大門（全部通關）":NAMES[res.j-1])+"</b>。"+(res.j>=11?"":"要從 <b>"+NAMES[res.j]+"</b> 接著玩嗎？");$("cbox2").classList.remove("hidden");return}
+  begin()})};
+$("cyes").onclick=()=>{const r=cloudRes;st={lock:r.j,t0:Date.now(),times:r.times,lockedUntil:0,wrong:0,lastT:r.lastT,coins:Math.max(0,3-r.hints),hintShown:-1,evDone:r.j>=2,wrongAll:0,ice:true,resumed:true};save();$("pick").classList.add("hidden");render();if(st.lock<11){$("msg").textContent="已接續進度，從"+NAMES[st.lock]+"開始。";$("msg").className="msg ok"}};
+$("cno").onclick=()=>{$("cbox2").classList.add("hidden");begin()};
+function begin(){st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");showStart()};
 $("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));localStorage.removeItem("ahma6_last");location.reload()}};
 if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger|; wv\)/i.test(navigator.userAgent))$("inapp").classList.remove("hidden");
 NAMES.slice(0,10).forEach((n,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent="已經通過 "+n;$("rlock").appendChild(o)});
