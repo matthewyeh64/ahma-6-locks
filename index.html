@@ -72,8 +72,8 @@ function showStart(){if(!st.ice&&st.lock===0)$("ice").classList.remove("hidden")
 $("qbtn").onclick=()=>{$("qbox").textContent=QS[Math.floor(Math.random()*QS.length)]};
 $("lbtn").onclick=()=>{const n=parseInt($("np").value);if(!n||n<2){$("lbox").textContent="請先輸入桌上有幾個人";return}$("lbox").textContent="抽到了！從你的左手邊算起，第 "+(Math.floor(Math.random()*n)+1)+" 位，是第一關的組長。"};
 $("iceok").onclick=()=>{const a=$("tn").value.trim(),b=$("ts").value.trim();if(a||b)report(D[grp].name,"組名："+a+"／口號："+b,0);st.ice=true;st.lastT=Date.now();save();$("ice").classList.add("hidden");render()};
-const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音，8 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
-function taskUI(){$("task").textContent=TASKS[st.lock]}
+const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音（下面可以播放），9 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
+function taskUI(){$("task").textContent=TASKS[st.lock];if(st.lock===3){const a=document.createElement("audio");a.controls=true;a.preload="auto";a.src="son.mp3";a.style.cssText="width:100%;margin-top:8px";$("task").appendChild(a)}}
 function revCheck(){if(!st||st.lock>=6||$("play").classList.contains("hidden"))return;const late=Date.now()-st.lastT>480000;
  $("revbtn").classList.toggle("hidden",!late||st.revShown===st.lock);$("revbox").classList.toggle("hidden",st.revShown!==st.lock);if(st.revShown===st.lock)$("revbox").textContent="答案公布：密碼是 "+st.revCode+"。請照著輸入，再想想為什麼。"}
 $("filebtn").onclick=()=>$("filebox").classList.toggle("hidden");
