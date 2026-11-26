@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>共識營報名</title>
+<style>
+:root{--bg:#f6f1e8;--card:#fff;--ink:#2a2118;--mute:#7a6a58;--line:#e0d3bf;--brand:#8a4b1f;--brand2:#b9672c;--ok:#2e7d4f;--bad:#c0392b}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1c1712;--card:#27201a;--ink:#f1e8da;--mute:#b3a592;--line:#43382c;--brand:#e0a06a;--brand2:#f0b07a;--ok:#6cc78f;--bad:#ff8a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 90px}
+h1{font-size:26px;margin:6px 0 2px}
+.sub{color:var(--mute);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+.card h2{font-size:17px;margin:0 0 10px;color:var(--brand)}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;font-size:15px}
+.info b{color:var(--brand)}
+label{display:block;font-size:14px;color:var(--mute);margin:0 0 3px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:42px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand2);outline-offset:0}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.req{color:var(--bad)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;color:var(--mute);text-align:left;font-weight:600;padding:4px 6px}
+td{padding:4px 4px;vertical-align:top}
+td select{min-width:86px;padding-left:6px;padding-right:2px}
+td.n{width:30px;color:var(--mute);text-align:center;padding-top:14px}
+td.x{width:44px}
+.row.bad input,.row.bad select{border-color:var(--bad)}
+.row.done input,.row.done select{opacity:.6}
+.st{font-size:12px;color:var(--mute);padding:0 6px}
+.st.ok{color:var(--ok)}.st.fail{color:var(--bad)}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;min-height:42px}
+button.pri{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+.ico{padding:0;width:40px;font-size:18px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.sp{flex:1}
+.tip{font-size:13px;color:var(--mute)}
+.paste{display:none;margin-top:10px}
+.paste.on{display:block}
+.paste textarea{min-height:130px;font-family:inherit}
+.sticky{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:center;z-index:5}
+.sticky .cnt{font-weight:700}
+.msg{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px}
+.msg.bad{background:rgba(192,57,43,.12);border:1px solid var(--bad)}
+.msg.ok{background:rgba(46,125,79,.12);border:1px solid var(--ok)}
+.done-box{text-align:center;padding:26px 10px}
+.done-box .big{font-size:44px}
+.code{font-family:ui-monospace,Consolas,monospace;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:2px 8px}
+.hidden{display:none}
+@media (max-width:700px){
+ thead{display:none}
+ table,tbody,tr,td{display:block;width:100%}
+ tr.row{border:1px solid var(--line);border-radius:12px;padding:8px;margin:0 0 10px;position:relative}
+ td.n{width:auto;text-align:left;padding:0 0 4px;font-weight:700}
+ td.x{position:absolute;top:4px;right:4px;width:auto}
+ td::before{content:attr(data-l);display:block;font-size:12px;color:var(--mute)}
+ td.n::before,td.x::before{content:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>員工共識營　報名</h1>
+<p class="sub">各單位主管代為報名，一次可填多位同仁。</p>
+
+<div class="card">
+ <h2>活動資訊</h2>
+ <div class="info">
+  <div><b>日期</b>　2027 年 1 月 10 日（日）</div>
+  <div><b>時間</b>　08:00 簽到，08:10 開始</div>
+  <div><b>報名截止</b>　<span id="ddl">請見公告</span></div>
+ </div>
+ <p class="tip" style="margin:8px 0 0">報名後如需更改，請聯絡籌備小組；請勿重複送出同一位同仁。</p>
+</div>
+
+<div id="formArea">
+<div class="card">
+ <h2>1. 單位與主管</h2>
+ <div class="g3">
+  <div><label>單位 <span class="req">*</span></label><input id="unit" autocomplete="organization" placeholder="例：護理部 / 急診"></div>
+  <div><label>填表主管姓名 <span class="req">*</span></label><input id="boss" autocomplete="name"></div>
+  <div><label>聯絡方式（分機或 email） <span class="req">*</span></label><input id="contact" autocomplete="off" placeholder="例：分機 1234"></div>
+ </div>
+</div>
+
+<div class="card">
+ <h2>2. 報名同仁</h2>
+ <table>
+  <thead><tr><th></th><th>姓名 *</th><th>職稱／職類 *</th><th>用餐 *</th><th>是否開車 *</th><th>備註（過敏、行動不便等）</th><th></th></tr></thead>
+  <tbody id="rows"></tbody>
+ </table>
+ <div class="bar">
+  <button id="add">＋ 新增一位</button>
+  <button id="add5">＋ 一次加 5 位</button>
+  <button id="pasteBtn">從 Excel 貼上名單</button>
+  <span class="sp"></span>
+  <span class="tip">用餐、是否開車預設為「葷食」「否」，有不同再改。</span>
+ </div>
+ <div class="paste" id="pasteBox">
+  <label>貼上多位同仁（每行一位，欄位用 Tab 或逗號分隔：姓名、職稱／職類、用餐、是否開車、備註；後面三欄可省略）</label>
+  <textarea id="pasteTx" placeholder="王小明&#9;護理師&#9;葷食&#9;否&#10;林小美&#9;藥師&#9;素食&#9;是&#9;海鮮過敏"></textarea>
+  <div class="bar"><button class="pri" id="pasteGo">加入名單</button><button id="pasteCancel">取消</button></div>
+ </div>
+</div>
+<div id="err"></div>
+</div>
+
+<div id="doneArea" class="card hidden"></div>
+</div>
+
+<div class="sticky" id="sticky">
+ <span>共 <span class="cnt" id="cnt">0</span> 位</span>
+ <button class="pri" id="submit">確認並送出報名</button>
+</div>
+
+<script>
+var CFG={
+  form:"https://docs.google.com/forms/d/e/1FAIpQLSd835VJlJJmazH4p7SmYHHDf-jtk_5qLCJ75dY0-vM9Yy1njA/formResponse",
+  deadline:"",
+  e:{batch:"entry.1362540516",unit:"entry.1101202943",boss:"entry.737617539",contact:"entry.1846401002",name:"entry.816493288",title:"entry.1466269780",meal:"entry.1243746596",car:"entry.605661529",note:"entry.98518608"}
+};
+if(CFG.deadline)document.getElementById("ddl").textContent=CFG.deadline;
+var $=function(i){return document.getElementById(i)};
+var LS="ahma_reg_draft_v1";
+var batch="R"+new Date().toISOString().slice(2,16).replace(/[-:T]/g,"")+Math.random().toString(36).slice(2,5).toUpperCase();
+var sending=false,finished=false;
+
+function rowHTML(d){
+  d=d||{};
+  var tr=document.createElement("tr");tr.className="row";
+  tr.innerHTML='<td class="n"></td>'+
+   '<td data-l="姓名 *"><input class="f-name" value="'+esc(d.name)+'" autocomplete="off"></td>'+
+   '<td data-l="職稱／職類 *"><input class="f-title" value="'+esc(d.title)+'" placeholder="例：護理師" autocomplete="off"></td>'+
+   '<td data-l="用餐 *"><select class="f-meal"><option>葷食</option><option>素食</option></select></td>'+
+   '<td data-l="是否開車 *"><select class="f-car"><option>否</option><option>是</option></select></td>'+
+   '<td data-l="備註"><input class="f-note" value="'+esc(d.note)+'" autocomplete="off"></td>'+
+   '<td class="x"><button class="ico" title="刪除這位" aria-label="刪除這位">✕</button><div class="st"></div></td>';
+  if(d.meal)tr.querySelector(".f-meal").value=d.meal;
+  if(d.car)tr.querySelector(".f-car").value=d.car;
+  tr.querySelector(".ico").onclick=function(){if(sending)return;tr.remove();renum();save()};
+  tr.addEventListener("input",save);tr.addEventListener("change",save);
+  $("rows").appendChild(tr);return tr;
+}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+function renum(){var rs=$("rows").children;for(var i=0;i<rs.length;i++)rs[i].querySelector(".n").textContent=i+1;$("cnt").textContent=rs.length}
+function addRows(n){for(var i=0;i<n;i++)rowHTML();renum();save();var last=$("rows").lastElementChild;if(last)last.querySelector(".f-name").focus()}
+function val(tr,c){return tr.querySelector(c).value.trim()}
+function collect(){return Array.prototype.map.call($("rows").children,function(tr){return {tr:tr,name:val(tr,".f-name"),title:val(tr,".f-title"),meal:val(tr,".f-meal"),car:val(tr,".f-car"),note:val(tr,".f-note")}})}
+
+function save(){try{localStorage.setItem(LS,JSON.stringify({unit:$("unit").value,boss:$("boss").value,contact:$("contact").value,rows:collect().map(function(r){return{name:r.name,title:r.title,meal:r.meal,car:r.car,note:r.note}})}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS)||"null");if(d){$("unit").value=d.unit||"";$("boss").value=d.boss||"";$("contact").value=d.contact||"";(d.rows||[]).forEach(rowHTML)}}catch(e){}
+  if(!$("rows").children.length)for(var i=0;i<3;i++)rowHTML();renum()}
+["unit","boss","contact"].forEach(function(i){$(i).addEventListener("input",save)});
+
+$("add").onclick=function(){addRows(1)};
+$("add5").onclick=function(){addRows(5)};
+$("pasteBtn").onclick=function(){$("pasteBox").classList.toggle("on");$("pasteTx").focus()};
+$("pasteCancel").onclick=function(){$("pasteBox").classList.remove("on")};
+$("pasteGo").onclick=function(){
+  var lines=$("pasteTx").value.split(/\r?\n/).map(function(s){return s.trim()}).filter(Boolean),n=0;
+  // 先移除完全空白的列
+  Array.prototype.slice.call($("rows").children).forEach(function(tr){if(!val(tr,".f-name")&&!val(tr,".f-title")&&!val(tr,".f-note"))tr.remove()});
+  lines.forEach(function(l){
+    var p=l.split(/\t|,|，/).map(function(s){return s.trim()});
+    if(!p[0])return;
+    var meal=/素/.test(p[2]||"")?"素食":"葷食";
+    var car=/^(是|有|y|yes|開車)/i.test(p[3]||"")?"是":"否";
+    rowHTML({name:p[0],title:p[1]||"",meal:meal,car:car,note:p.slice(4).join(" ")});n++;
+  });
+  renum();save();$("pasteTx").value="";$("pasteBox").classList.remove("on");
+};
+
+function validate(){
+  var errs=[];
+  ["unit","boss","contact"].forEach(function(i){$(i).style.borderColor="";if(!$(i).value.trim()){errs.push("請填寫："+({unit:"單位",boss:"填表主管姓名",contact:"聯絡方式"})[i]);$(i).style.borderColor="var(--bad)"}});
+  var rows=collect(),seen={},ok=0;
+  rows.forEach(function(r,i){
+    r.tr.classList.remove("bad");
+    var any=r.name||r.title||r.note;
+    if(!any){return}
+    if(!r.name||!r.title){errs.push("第 "+(i+1)+" 位：姓名與職稱／職類都要填");r.tr.classList.add("bad");return}
+    if(seen[r.name]){errs.push("第 "+(i+1)+" 位「"+r.name+"」姓名重複");r.tr.classList.add("bad");return}
+    seen[r.name]=1;ok++;
+  });
+  if(!ok)errs.push("請至少填寫一位同仁");
+  return errs;
+}
+
+function post(r){
+  var fd=new URLSearchParams(),e=CFG.e;
+  fd.append(e.batch,batch);fd.append(e.unit,$("unit").value.trim());fd.append(e.boss,$("boss").value.trim());fd.append(e.contact,$("contact").value.trim());
+  fd.append(e.name,r.name);fd.append(e.title,r.title);fd.append(e.meal,r.meal);fd.append(e.car,r.car);fd.append(e.note,r.note);
+  return fetch(CFG.form,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:fd.toString()});
+}
+
+$("submit").onclick=async function(){
+  if(sending)return;
+  var errs=validate();
+  $("err").innerHTML=errs.length?'<div class="msg bad">'+errs.map(esc).join("<br>")+'</div>':"";
+  if(errs.length){window.scrollTo({top:0,behavior:"smooth"});return}
+  var rows=collect().filter(function(r){return r.name});
+  if(!confirm("確認送出 "+rows.length+" 位同仁的報名？\n單位："+$("unit").value.trim()+"\n送出後如要更改請聯絡籌備小組。"))return;
+  sending=true;$("submit").disabled=true;$("submit").textContent="送出中…";
+  var failed=0;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i],st=r.tr.querySelector(".st");
+    if(r.tr.classList.contains("done"))continue;
+    st.textContent="送出中…";st.className="st";
+    try{await post(r);r.tr.classList.add("done");st.textContent="已送出";st.className="st ok"}
+    catch(e){failed++;st.textContent="失敗";st.className="st fail"}
+  }
+  sending=false;$("submit").disabled=false;
+  if(failed){
+    $("submit").textContent="重送失敗的 "+failed+" 位";
+    $("err").innerHTML='<div class="msg bad">有 '+failed+' 位沒有送出（可能是網路問題）。已送出的不會重複送，請按「重送」。</div>';
+    return;
+  }
+  finished=true;try{localStorage.removeItem(LS)}catch(e){}
+  var list=rows.map(function(r,i){return (i+1)+". "+esc(r.name)+"（"+esc(r.title)+"，"+r.meal+"，開車："+r.car+(r.note?"，"+esc(r.note):"")+"）"}).join("<br>");
+  $("formArea").classList.add("hidden");$("sticky").classList.add("hidden");
+  var d=$("doneArea");d.classList.remove("hidden");
+  d.innerHTML='<div class="done-box"><div class="big">✅</div><h2 style="color:var(--ok)">報名完成，共 '+rows.length+' 位</h2>'+
+   '<p>單位：'+esc($("unit").value.trim())+'　主管：'+esc($("boss").value.trim())+'<br>報名編號 <span class="code">'+batch+'</span></p>'+
+   '<p style="text-align:left;max-width:560px;margin:10px auto">'+list+'</p>'+
+   '<p class="tip">請截圖或記下報名編號。如需增減同仁，請聯絡籌備小組，不要重新送出整份名單。</p>'+
+   '<button id="again">再報名另一個單位</button></div>';
+  $("again").onclick=function(){location.reload()};
+};
+window.addEventListener("beforeunload",function(e){if(sending){e.preventDefault();e.returnValue=""}});
+load();
+window.__reg={collect:collect,validate:validate,batch:function(){return batch}};
+</script>
+</body>
+</html>
