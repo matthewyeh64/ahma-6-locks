@@ -16,22 +16,31 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 .msg{min-height:26px;margin-top:10px;font-weight:700;font-size:17px}.msg.bad{color:var(--red)}.msg.ok{color:var(--green)}
 .big{font-size:56px;text-align:center;font-weight:900;color:var(--red);margin:8px 0}
 .times td{padding:3px 8px;font-size:15px}.hidden{display:none}
+.mood{height:14px;background:#e8dccb;border-radius:8px;overflow:hidden;margin:6px 0 2px}.mood i{display:block;height:100%;background:linear-gradient(90deg,#d9822b,#e6b84a);transition:width .6s}
+.say{background:#fff8e8;border-left:5px solid #d9822b;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:16px;line-height:1.5}
+.coins{font-size:15px;margin-top:10px}button.hint{background:#2f6f8f;font-size:16px;padding:10px;margin-top:8px}.hintbox{background:#eaf4f8;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:15px;line-height:1.5}
+.ev{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:20px;z-index:9}.ev .box{background:#fff;border-radius:14px;padding:20px;max-width:440px;width:100%}.ev button{margin-top:8px;font-size:17px;padding:12px}
+.diary{font-size:14px;line-height:1.6;color:#4a3b2a;margin-top:10px}.diary div{border-bottom:1px dashed #d9c9b0;padding:4px 0}
+
 </style></head><body><main>
 <h1>阿嬤的六道鎖</h1><p class="sub">輸入各關密碼。答錯要等 30 秒，大家重新討論一下再試。</p>
 <div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button></div>
 <div class="card hidden" id="play">
-<div id="who" style="font-weight:700"></div><div class="step" id="steps"></div>
+<div id="who" style="font-weight:700"></div><div class="mood"><i id="moodbar" style="width:20%"></i></div><div id="moodtxt" style="font-size:13px;color:#6b5a47"></div><div class="step" id="steps"></div>
 <div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div>
 <input id="code" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="輸入密碼">
-<button id="send">送出</button><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
+<button id="send">送出</button><button class="hint" id="hintbtn">用 1 枚提示幣看提示</button><div class="hintbox hidden" id="hintbox"></div><div class="coins" id="coins"></div><div class="diary" id="diary"></div><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
 <div class="card hidden" id="done"><div class="big">全部通關！</div>
 <p style="text-align:center;font-size:18px">請派一位同學到寶箱前，主持人會給你們寶箱的密碼。</p>
-<table class="times" id="times"></table><div id="sync2" style="font-size:13px;color:#6b5a47;text-align:center"></div></div>
+<div class="say" id="finalsay"></div><div id="badge" style="text-align:center;font-size:20px;font-weight:900;margin:8px 0"></div><table class="times" id="times"></table><div id="sync2" style="font-size:13px;color:#6b5a47;text-align:center"></div></div>
 <button class="ghost" id="reset">重新開始（試玩用，會清掉這一組的紀錄）</button>
-</main>
+</main><div class="ev hidden" id="ev"><div class="box"><div style="font-size:20px;font-weight:900;color:#b3261e">急診來電！</div><p id="evq" style="font-size:17px;line-height:1.5"></p><div id="evopts"></div><div id="evres" style="margin-top:8px;font-weight:700"></div></div></div>
 <script>
 const D=[{"name": "第一組", "h": ["1995433065981062", "1465805807671785", "7295470819567122", "6968751069998735", "164334673658914", "844805619616698"]}, {"name": "第二組", "h": ["4184540355904839", "5169981862499336", "3668247816295654", "6362158148367490", "982239589417750", "8115395317361456"]}, {"name": "第三組", "h": ["8850560132140004", "2075996141995882", "1418740388407883", "7130658520110164", "5648450485642370", "1385464741733703"]}, {"name": "第四組", "h": ["4791780117466875", "6068110307986668", "2019248844757793", "5989640262100331", "4130273061488011", "1996746328776991"]}, {"name": "第五組", "h": ["6625129330611122", "5908602662701378", "5882895585917167", "5634697415878741", "1436883944812023", "7873673338408522"]}, {"name": "第六組", "h": ["7895237302858409", "5610125243634257", "5569652438434577", "912450067386071", "7886973510641457", "5454316870816800"]}, {"name": "第七組", "h": ["2675375376186483", "594896088287875", "2199086435265735", "8689099553109963", "7738230736225517", "587785209860211"]}, {"name": "第八組", "h": ["1828717595853935", "7129413406486853", "7016744474963388", "8620077565371310", "7560831524794761", "5553592916019732"]}, {"name": "第九組", "h": ["7097479669124382", "5903511133320580", "6030090626070713", "1000228846691147", "8644955418855205", "439223955818735"]}, {"name": "第十組", "h": ["6001747141981248", "1636170727938049", "3131550897804488", "8295298422440679", "6472803641725132", "2910676230201778"]}, {"name": "第十一組", "h": ["2519132313816850", "5904052636257031", "1994680176007616", "5150349489565877", "1765259760381700", "1445753641940998"]}, {"name": "第十二組", "h": ["6399853689116007", "489874210473205", "6669849155773149", "2262890686091812", "5418570817027009", "1676120399949341"]}, {"name": "第十三組", "h": ["7015345242813870", "781619190208321", "7699687622752884", "2921862114286335", "6785931592395425", "1119457397611800"]}, {"name": "第十四組", "h": ["1523438263913322", "7093843987422284", "879407157098191", "8434726332426635", "8134012193139740", "4538520689078732"]}, {"name": "第十五組", "h": ["1186372544278748", "1983310348169105", "1377690362937136", "2687678649002658", "2187195128494143", "118824945466311"]}, {"name": "第十六組", "h": ["2544691539063725", "984764549778658", "4463376764662118", "8494127948080996", "8765514498050861", "8571126425143634"]}, {"name": "第十七組", "h": ["6330974401363974", "322035709949630", "267525274170503", "5969017716711901", "4495242257536825", "8046082304399448"]}, {"name": "第十八組", "h": ["151905980384064", "8772668138664400", "2048632644026944", "8780864546801846", "6911527968957477", "5728733107667568"]}];
 const NAMES=["鎖 1　時間軸","鎖 2　起身","鎖 3　藥箱","鎖 4　二兒子的話","鎖 5　她的家","大門"];
+const SAYS=["那天早上，我只是想煮一碗水餃，給你們過年吃。","他們扶我站起來的時候，我真的很怕，怕又倒下去。","藥箱裡的瓶瓶罐罐，我都分不清哪個該吃了。","我不想拖累你們……可是，我也不想一直待在醫院。","我家那條走廊，晚上真的很暗，貓又愛在腳邊繞。","謝謝你們。我要回家過年了。"];
+const HINTS=["先找「整件事的起點」那張卡，再看哪張卡說「之後」。","口訣：說、放、傾、站。先說明最先，站起來最後。符號對照表在你們桌上那一頁。","把每樣藥對照「阿嬤檔案」上的出院藥單，藥單上沒有的就是答案。","二兒子說的話，要拿證人卡一句一句比，看哪句被反駁。","看圖：哪裡會滑倒、絆倒、太暗、沒有扶手？","每關密碼的最後一個數字，依序連起來，共 5 位。"];
+const EVQ={q:"阿嬤剛剛在房間跌倒了！你們第一件事該做什麼？",o:["馬上用力把她拉起來","先不要亂移動她，確認意識和哪裡痛，再找人幫忙","叫她自己站起來走走看"],a:1};
 const COOL=30,$=id=>document.getElementById(id);
 const FORM="https://docs.google.com/forms/d/e/1FAIpQLSfTri03wuRn_bnLihuC1iInQUbBdLzs2H6nLE-hPg-YNcrRLw/formResponse";
 const E={grp:"entry.110783950",lock:"entry.1380846244",sec:"entry.1283535157"};
@@ -49,15 +58,25 @@ function load(){try{return JSON.parse(localStorage.getItem(key(grp)))||null}catc
 function save(){try{localStorage.setItem(key(grp),JSON.stringify(st))}catch(e){}}
 D.forEach((g,i)=>{const o=document.createElement("option");o.value=i;o.textContent=g.name;$("grp").appendChild(o)});
 $("grp").onchange=()=>{$("go").disabled=$("grp").value===""};
-$("go").onclick=()=>{grp=+$("grp").value;st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now()};save();$("pick").classList.add("hidden");render()};
+$("go").onclick=()=>{grp=+$("grp").value;st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now(),coins:3,hintShown:-1,evDone:false,wrongAll:0};st.coins=st.coins==null?3:st.coins;if(st.hintShown==null)st.hintShown=-1;save();$("pick").classList.add("hidden");render()};
 $("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));location.reload()}};
+function moodUI(){const m=Math.min(100,20+Math.round(st.lock*16));$("moodbar").style.width=m+"%";$("moodtxt").textContent="阿嬤的心情　"+(m>=100?"😊":m>=68?"🙂":m>=36?"😐":"😟")+"　"+m+"%";
+ $("coins").textContent="提示幣："+"🪙".repeat(st.coins)+(st.coins?"":"（用完了）");$("hintbtn").disabled=st.coins<1||st.hintShown===st.lock;$("hintbox").classList.toggle("hidden",st.hintShown!==st.lock);
+ if(st.hintShown===st.lock)$("hintbox").textContent="提示："+HINTS[st.lock];
+ $("diary").innerHTML=st.times.map((t,i)=>"<div>「"+SAYS[i]+"」</div>").join("")}
+$("hintbtn").onclick=()=>{if(st.coins<1)return;st.coins--;st.hintShown=st.lock;report(D[grp].name,"提示 "+NAMES[st.lock],0);save();moodUI()};
+function event(){if(st.evDone)return;st.evDone=true;save();$("evq").textContent=EVQ.q;$("evres").textContent="";$("evopts").innerHTML="";
+ EVQ.o.forEach((t,i)=>{const b=document.createElement("button");b.textContent=String.fromCharCode(65+i)+"　"+t;b.onclick=()=>{[...$("evopts").children].forEach(x=>x.disabled=true);
+  if(i===EVQ.a){st.coins++;$("evres").textContent="答對了！獎勵 1 枚提示幣。";$("evres").style.color="#1b7a3d"}else{$("evres").textContent="先不要移動她，確認意識和疼痛，再找人幫忙。這次沒有獎勵，但不扣分。";$("evres").style.color="#b3261e"}
+  save();moodUI();const c=document.createElement("button");c.textContent="繼續";c.onclick=()=>$("ev").classList.add("hidden");$("evopts").appendChild(c)};$("evopts").appendChild(b)});$("ev").classList.remove("hidden")}
 function fmt(ms){const s=Math.round(ms/1000);return Math.floor(s/60)+" 分 "+(s%60)+" 秒"}
 function render(){
- if(st.lock>=6){$("play").classList.add("hidden");$("done").classList.remove("hidden");
+ if(st.lock>=6){$("play").classList.add("hidden");$("done").classList.remove("hidden");$("finalsay").textContent="阿嬤說：「"+SAYS[5]+"」";
+  {const tot=st.times.reduce((a,b)=>a+b,0),w=st.wrongAll||0,used=3-st.coins+(st.evDone&&st.coins>3?0:0);$("badge").textContent=w===0?"🏅 稱號：零失誤的好家人":tot<20*60*1000?"🏅 稱號：飛毛腿回家隊":"🏅 稱號：一步一腳印的接力隊"}
   $("times").innerHTML=st.times.map((t,i)=>"<tr><td>"+NAMES[i]+"</td><td>"+fmt(t)+"</td></tr>").join("")+"<tr><td><b>總共</b></td><td><b>"+fmt(st.times.reduce((a,b)=>a+b,0))+"</b></td></tr>";return}
  $("play").classList.remove("hidden");$("who").textContent=D[grp].name;$("title").textContent=NAMES[st.lock];
  $("steps").innerHTML=NAMES.map((n,i)=>'<div class="dot '+(i<st.lock?"done":i==st.lock?"on":"")+'">'+(i<5?i+1:"門")+"</div>").join("");
- $("code").maxLength=st.lock==5?5:4;$("code").value="";$("msg").textContent="";$("msg").className="msg";tick();}
+ moodUI();$("code").maxLength=st.lock==5?5:4;$("code").value="";$("msg").textContent="";$("msg").className="msg";tick();}
 let timer=null;window.addEventListener('online',flush);setInterval(()=>{setSync();$('sync2').textContent=$('sync').textContent},2000);flush();
 function tick(){clearInterval(timer);const upd=()=>{const left=Math.ceil((st.lockedUntil-Date.now())/1000);
  if(left>0){$("send").disabled=true;$("code").disabled=true;$("send").textContent="請等 "+left+" 秒";}
@@ -67,7 +86,7 @@ $("send").onclick=()=>{
  if(h(grp+1+"|"+(st.lock+1)+"|"+v)===D[grp].h[st.lock]){
   const used=Date.now()-st.lastT;st.times.push(used);st.lastT=Date.now();report(D[grp].name,NAMES[st.lock],Math.round(used/1000));st.lock++;st.wrong=0;save();
   if(st.lock>=6){render();return}
-  render();$("msg").textContent="通過！進到"+NAMES[st.lock];$("msg").className="msg ok";
- }else{st.wrong++;st.lockedUntil=Date.now()+COOL*1000;save();$("msg").textContent="密碼不對（第 "+st.wrong+" 次）。等 30 秒，大家再討論一下。";$("msg").className="msg bad";tick()}};
+  render();$("msg").innerHTML="通過！進到"+NAMES[st.lock]+'<div class="say">阿嬤說：「'+SAYS[st.lock-1]+'」</div>';$("msg").className="msg ok";if(st.lock===2)event();
+ }else{st.wrong++;st.wrongAll=(st.wrongAll||0)+1;st.lockedUntil=Date.now()+COOL*1000;save();$("msg").textContent="密碼不對（第 "+st.wrong+" 次）。等 30 秒，大家再討論一下。";$("msg").className="msg bad";tick()}};
 $("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
 </script></body></html>
