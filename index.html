@@ -33,7 +33,8 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 <button id="iceok">開始闖關</button></div>
 <div class="card hidden" id="play">
 <div id="who" style="font-weight:700"></div><div class="mood"><i id="moodbar" style="width:20%"></i></div><div id="moodtxt" style="font-size:13px;color:#6b5a47"></div><div class="step" id="steps"></div>
-<div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div><div class="hintbox" id="task" style="background:#fff8e8"></div>
+<div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div><div class="hintbox" id="task" style="background:#fff8e8"></div><button class="hint" id="filebtn" style="background:#6b5a47">看「林秀英　阿嬤檔案」</button>
+<div class="hintbox hidden" id="filebox" style="background:#f4efe6"><b>病歷摘要</b>（第 23 天）<br>・82 歲女性。高血壓、糖尿病、慢性腎臟病，新發現心房顫動。<br>・中風第 23 天，右半邊身體無力（偏癱），說話慢、有點不清楚。<br>・短期記憶變差，安全意識差。跌倒風險高，第 18 天在病房跌倒過。<br>・吃細碎軟質食物，近三天進食量減少。<br><br><b>出院藥單</b>（鎖 3 要用）<br>・抗凝血藥 apixaban 2.5 毫克，每日兩次。<br>・降血脂藥 atorvastatin 20 毫克，睡前。<br>・降血壓藥 amlodipine 5 毫克，每日一次。<br>・止痛藥乙醯胺酚（普拿疼類），需要時吃。<br><br><b>起身口訣</b>（鎖 2 要用）：說 → 放 → 傾 → 站<br>先「說」明並鎖好輪椅 → 「放」好腳掌與輪椅位置 → 扶腰背請她前「傾」 → 她自己「站」起來。<br><br><b>大門</b>：5 位數，把鎖 1 到鎖 5 的密碼各取「最後一位數字」，依序連起來。<br><b>答錯</b>：可以再送，但要先等 30 秒，大家重新討論一下。</div>
 <input id="code" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="輸入密碼">
 <button id="send">送出</button><button class="hint" id="hintbtn">用 1 枚提示幣看提示</button><button class="hint hidden" id="revbtn" style="background:#8a2f2f">時間到了，我們想看答案</button><div class="say hidden" id="revbox"></div><div class="hintbox hidden" id="hintbox"></div><div class="coins" id="coins"></div><div class="diary" id="diary"></div><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
 <div class="card hidden" id="done"><div class="big">全部通關！</div>
@@ -71,10 +72,11 @@ function showStart(){if(!st.ice&&st.lock===0)$("ice").classList.remove("hidden")
 $("qbtn").onclick=()=>{$("qbox").textContent=QS[Math.floor(Math.random()*QS.length)]};
 $("lbtn").onclick=()=>{const n=parseInt($("np").value);if(!n||n<2){$("lbox").textContent="請先輸入桌上有幾個人";return}$("lbox").textContent="抽到了！從你的左手邊算起，第 "+(Math.floor(Math.random()*n)+1)+" 位，是第一關的組長。"};
 $("iceok").onclick=()=>{const a=$("tn").value.trim(),b=$("ts").value.trim();if(a||b)report(D[grp].name,"組名："+a+"／口號："+b,0);st.ice=true;st.lastT=Date.now();save();$("ice").classList.add("hidden");render()};
-const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音（下面可以播放），9 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
-function taskUI(){$("task").textContent=TASKS[st.lock];if(st.lock===3){const a=document.createElement("audio");a.controls=true;a.preload="auto";a.src="son.mp3";a.style.cssText="width:100%;margin-top:8px";$("task").appendChild(a)}}
+const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音，8 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
+function taskUI(){$("task").textContent=TASKS[st.lock]}
 function revCheck(){if(!st||st.lock>=6||$("play").classList.contains("hidden"))return;const late=Date.now()-st.lastT>480000;
  $("revbtn").classList.toggle("hidden",!late||st.revShown===st.lock);$("revbox").classList.toggle("hidden",st.revShown!==st.lock);if(st.revShown===st.lock)$("revbox").textContent="答案公布：密碼是 "+st.revCode+"。請照著輸入，再想想為什麼。"}
+$("filebtn").onclick=()=>$("filebox").classList.toggle("hidden");
 $("revbtn").onclick=()=>{const n=st.lock==5?5:4;let found="";for(let i=0;i<Math.pow(10,n);i++){const c=String(i).padStart(n,"0");if(h(grp+1+"|"+(st.lock+1)+"|"+c)===D[grp].h[st.lock]){found=c;break}}
  st.revShown=st.lock;st.revCode=found;report(D[grp].name,"看答案 "+NAMES[st.lock],0);save();revCheck()};
 function moodUI(){taskUI();const m=Math.min(100,20+Math.round(st.lock*16));$("moodbar").style.width=m+"%";$("moodtxt").textContent="阿嬤的心情　"+(m>=100?"😊":m>=68?"🙂":m>=36?"😐":"😟")+"　"+m+"%";
