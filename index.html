@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>阿嬤的六道鎖　輸入密碼</title>
+<style>
+:root{--bg:#f6efe4;--ink:#2a2118;--card:#fff;--red:#b3261e;--green:#1b7a3d;--accent:#8a4b1f}
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:520px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:4px 0 2px}.sub{color:#6b5a47;font-size:14px;margin:0 0 16px}
+.card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 1px 4px #0002;margin-bottom:14px}
+label{display:block;font-weight:700;margin-bottom:6px}
+select,input{width:100%;font-size:22px;padding:12px;border:2px solid #cdbba3;border-radius:10px;background:#fff;color:var(--ink)}
+input{letter-spacing:6px;text-align:center}
+button{width:100%;font-size:20px;font-weight:700;padding:14px;border:0;border-radius:10px;background:var(--accent);color:#fff;margin-top:12px}
+button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a4b1f;border:1.5px solid #cdbba3;font-size:14px;padding:8px;margin-top:20px}
+.step{display:flex;gap:6px;margin:10px 0 4px}.dot{flex:1;text-align:center;padding:6px 0;border-radius:8px;background:#e8dccb;font-size:13px;font-weight:700}
+.dot.on{background:var(--accent);color:#fff}.dot.done{background:var(--green);color:#fff}
+.msg{min-height:26px;margin-top:10px;font-weight:700;font-size:17px}.msg.bad{color:var(--red)}.msg.ok{color:var(--green)}
+.big{font-size:56px;text-align:center;font-weight:900;color:var(--red);margin:8px 0}
+.times td{padding:3px 8px;font-size:15px}.hidden{display:none}
+</style></head><body><main>
+<h1>阿嬤的六道鎖</h1><p class="sub">輸入各關密碼。答錯要等 30 秒，大家重新討論一下再試。</p>
+<div class="card" id="pick"><label for="grp">你們是第幾組？</label><select id="grp"><option value="">請選擇</option></select><button id="go" disabled>開始</button></div>
+<div class="card hidden" id="play">
+<div id="who" style="font-weight:700"></div><div class="step" id="steps"></div>
+<div style="font-size:20px;font-weight:900;margin:10px 0 4px" id="title"></div>
+<input id="code" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="輸入密碼">
+<button id="send">送出</button><div class="msg" id="msg"></div><div id="sync" style="font-size:13px;color:#6b5a47;margin-top:6px"></div></div>
+<div class="card hidden" id="done"><div class="big">全部通關！</div>
+<p style="text-align:center;font-size:18px">請派一位同學到寶箱前，主持人會給你們寶箱的密碼。</p>
+<table class="times" id="times"></table><div id="sync2" style="font-size:13px;color:#6b5a47;text-align:center"></div></div>
+<button class="ghost" id="reset">重新開始（試玩用，會清掉這一組的紀錄）</button>
+</main>
+<script>
+const D=[{"name": "第一組", "h": ["1995433065981062", "1465805807671785", "7295470819567122", "6968751069998735", "164334673658914", "844805619616698"]}, {"name": "第二組", "h": ["4184540355904839", "5169981862499336", "3668247816295654", "6362158148367490", "982239589417750", "8115395317361456"]}, {"name": "第三組", "h": ["8850560132140004", "2075996141995882", "1418740388407883", "7130658520110164", "5648450485642370", "1385464741733703"]}, {"name": "第四組", "h": ["4791780117466875", "6068110307986668", "2019248844757793", "5989640262100331", "4130273061488011", "1996746328776991"]}, {"name": "第五組", "h": ["6625129330611122", "5908602662701378", "5882895585917167", "5634697415878741", "1436883944812023", "7873673338408522"]}, {"name": "第六組", "h": ["7895237302858409", "5610125243634257", "5569652438434577", "912450067386071", "7886973510641457", "5454316870816800"]}, {"name": "第七組", "h": ["2675375376186483", "594896088287875", "2199086435265735", "8689099553109963", "7738230736225517", "587785209860211"]}, {"name": "第八組", "h": ["1828717595853935", "7129413406486853", "7016744474963388", "8620077565371310", "7560831524794761", "5553592916019732"]}, {"name": "第九組", "h": ["7097479669124382", "5903511133320580", "6030090626070713", "1000228846691147", "8644955418855205", "439223955818735"]}, {"name": "第十組", "h": ["6001747141981248", "1636170727938049", "3131550897804488", "8295298422440679", "6472803641725132", "2910676230201778"]}, {"name": "第十一組", "h": ["2519132313816850", "5904052636257031", "1994680176007616", "5150349489565877", "1765259760381700", "1445753641940998"]}, {"name": "第十二組", "h": ["6399853689116007", "489874210473205", "6669849155773149", "2262890686091812", "5418570817027009", "1676120399949341"]}, {"name": "第十三組", "h": ["7015345242813870", "781619190208321", "7699687622752884", "2921862114286335", "6785931592395425", "1119457397611800"]}, {"name": "第十四組", "h": ["1523438263913322", "7093843987422284", "879407157098191", "8434726332426635", "8134012193139740", "4538520689078732"]}, {"name": "第十五組", "h": ["1186372544278748", "1983310348169105", "1377690362937136", "2687678649002658", "2187195128494143", "118824945466311"]}, {"name": "第十六組", "h": ["2544691539063725", "984764549778658", "4463376764662118", "8494127948080996", "8765514498050861", "8571126425143634"]}, {"name": "第十七組", "h": ["6330974401363974", "322035709949630", "267525274170503", "5969017716711901", "4495242257536825", "8046082304399448"]}, {"name": "第十八組", "h": ["151905980384064", "8772668138664400", "2048632644026944", "8780864546801846", "6911527968957477", "5728733107667568"]}];
+const NAMES=["鎖 1　時間軸","鎖 2　起身","鎖 3　藥箱","鎖 4　二兒子的話","鎖 5　她的家","大門"];
+const COOL=30,$=id=>document.getElementById(id);
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSfTri03wuRn_bnLihuC1iInQUbBdLzs2H6nLE-hPg-YNcrRLw/formResponse";
+const E={grp:"entry.110783950",lock:"entry.1380846244",sec:"entry.1283535157"};
+function qget(){try{return JSON.parse(localStorage.getItem("ahma6_queue"))||[]}catch(e){return[]}}
+function qset(q){try{localStorage.setItem("ahma6_queue",JSON.stringify(q))}catch(e){}}
+function flush(){const q=qget();if(!q.length){setSync();return}const it=q[0];const b=new URLSearchParams();b.set(E.grp,it.g);b.set(E.lock,it.l);b.set(E.sec,String(it.s));
+ fetch(FORM,{method:"POST",mode:"no-cors",body:b}).then(()=>{const q2=qget();q2.shift();qset(q2);flush()}).catch(()=>{setSync();setTimeout(flush,8000)})}
+function report(g,l,s){const q=qget();q.push({g:g,l:l,s:s});qset(q);flush()}
+function setSync(){const n=qget().length;$("sync").textContent=n?"成績傳送中（"+n+" 筆待送，請保持網路連線）":"成績已送出給主持人"}
+function h(s,seed){seed=seed||0;let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return String(4294967296*(2097151&h2)+(h1>>>0))}
+let grp=-1,st=null;
+const key=g=>"ahma6_"+g;
+function load(){try{return JSON.parse(localStorage.getItem(key(grp)))||null}catch(e){return null}}
+function save(){try{localStorage.setItem(key(grp),JSON.stringify(st))}catch(e){}}
+D.forEach((g,i)=>{const o=document.createElement("option");o.value=i;o.textContent=g.name;$("grp").appendChild(o)});
+$("grp").onchange=()=>{$("go").disabled=$("grp").value===""};
+$("go").onclick=()=>{grp=+$("grp").value;st=load()||{lock:0,t0:Date.now(),times:[],lockedUntil:0,wrong:0,lastT:Date.now()};save();$("pick").classList.add("hidden");render()};
+$("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清掉 "+D[grp].name+" 的紀錄重新開始？")){localStorage.removeItem(key(grp));location.reload()}};
+function fmt(ms){const s=Math.round(ms/1000);return Math.floor(s/60)+" 分 "+(s%60)+" 秒"}
+function render(){
+ if(st.lock>=6){$("play").classList.add("hidden");$("done").classList.remove("hidden");
+  $("times").innerHTML=st.times.map((t,i)=>"<tr><td>"+NAMES[i]+"</td><td>"+fmt(t)+"</td></tr>").join("")+"<tr><td><b>總共</b></td><td><b>"+fmt(st.times.reduce((a,b)=>a+b,0))+"</b></td></tr>";return}
+ $("play").classList.remove("hidden");$("who").textContent=D[grp].name;$("title").textContent=NAMES[st.lock];
+ $("steps").innerHTML=NAMES.map((n,i)=>'<div class="dot '+(i<st.lock?"done":i==st.lock?"on":"")+'">'+(i<5?i+1:"門")+"</div>").join("");
+ $("code").maxLength=st.lock==5?5:4;$("code").value="";$("msg").textContent="";$("msg").className="msg";tick();}
+let timer=null;window.addEventListener('online',flush);setInterval(()=>{setSync();$('sync2').textContent=$('sync').textContent},2000);flush();
+function tick(){clearInterval(timer);const upd=()=>{const left=Math.ceil((st.lockedUntil-Date.now())/1000);
+ if(left>0){$("send").disabled=true;$("code").disabled=true;$("send").textContent="請等 "+left+" 秒";}
+ else{$("send").disabled=false;$("code").disabled=false;$("send").textContent="送出";clearInterval(timer)}};upd();timer=setInterval(upd,250)}
+$("send").onclick=()=>{
+ const v=$("code").value.replace(/\D/g,"");if(!v)return;
+ if(h(grp+1+"|"+(st.lock+1)+"|"+v)===D[grp].h[st.lock]){
+  const used=Date.now()-st.lastT;st.times.push(used);st.lastT=Date.now();report(D[grp].name,NAMES[st.lock],Math.round(used/1000));st.lock++;st.wrong=0;save();
+  if(st.lock>=6){render();return}
+  render();$("msg").textContent="通過！進到"+NAMES[st.lock];$("msg").className="msg ok";
+ }else{st.wrong++;st.lockedUntil=Date.now()+COOL*1000;save();$("msg").textContent="密碼不對（第 "+st.wrong+" 次）。等 30 秒，大家再討論一下。";$("msg").className="msg bad";tick()}};
+$("code").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
+</script></body></html>
