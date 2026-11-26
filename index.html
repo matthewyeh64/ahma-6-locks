@@ -28,7 +28,7 @@ button:disabled{background:#b8a999}button.ghost{background:transparent;color:#8a
 <div class="card hidden" id="ice"><div style="font-size:20px;font-weight:900">開場破冰（約 3 分鐘）</div>
 <p><b>1　自我介紹</b>　每人一句：「我是＿＿，我在＿＿，<b>我今天最想回家做的一件事是＿＿</b>。」</p>
 <button class="hint" id="qbtn">抽一個暖身問題</button><div class="say" id="qbox">按上面的按鈕抽題，每人回答一次。</div>
-<p><b>2　組名和口號</b></p><input id="tn" placeholder="組名" style="letter-spacing:0;font-size:18px;margin-bottom:8px"><input id="ts" placeholder="口號" style="letter-spacing:0;font-size:18px">
+<p><b>2　找共同點</b>　全桌一起找出「每個人都符合」的一件事。</p><button class="hint" id="cbtn">抽一個找共同點的方向</button><div class="say" id="cbox">按上面的按鈕抽方向，找到後寫在下面（可不填）。</div><input id="tn" placeholder="我們這桌的共同點是……" style="letter-spacing:0;font-size:18px">
 <p><b>3　抽第一關組長</b>　桌上有幾個人？</p><input id="np" inputmode="numeric" maxlength="2" placeholder="人數" style="letter-spacing:0;font-size:18px"><button class="hint" id="lbtn">抽組長</button><div class="say" id="lbox"></div>
 <button id="iceok">開始闖關</button></div>
 <div class="card hidden" id="play">
@@ -70,8 +70,9 @@ $("reset").onclick=()=>{if(grp<0){location.reload();return}if(confirm("確定清
 const QS=["今年過年，你最想吃的一道菜是什麼？","你家過年一定會有的一件事是什麼？","你最難忘的一次「回家」是什麼時候？","如果能帶一樣東西回家給阿嬤，你會帶什麼？","你在照顧別人時，最常說的一句話是什麼？","小時候過年，你最期待的是什麼？","今天誰是「最想早點回家」的人？","你覺得家裡最像「家」的味道是什麼？"];
 function showStart(){if(!st.ice&&st.lock===0)$("ice").classList.remove("hidden");else render()}
 $("qbtn").onclick=()=>{$("qbox").textContent=QS[Math.floor(Math.random()*QS.length)]};
+$("cbtn").onclick=()=>{const C=["吃的東西","過年的回憶","照顧家人的經驗","小時候的事","興趣或嗜好","今天早上做的事","喜歡的季節或天氣","第一份工作"];$("cbox").textContent="方向：「"+C[Math.floor(Math.random()*C.length)]+"」。找一件全桌每個人都符合的事，不一定要很特別。"};
 $("lbtn").onclick=()=>{const n=parseInt($("np").value);if(!n||n<2){$("lbox").textContent="請先輸入桌上有幾個人";return}$("lbox").textContent="抽到了！從你的左手邊算起，第 "+(Math.floor(Math.random()*n)+1)+" 位，是第一關的組長。"};
-$("iceok").onclick=()=>{const a=$("tn").value.trim(),b=$("ts").value.trim();if(a||b)report(D[grp].name,"組名："+a+"／口號："+b,0);st.ice=true;st.lastT=Date.now();save();$("ice").classList.add("hidden");render()};
+$("iceok").onclick=()=>{const a=$("tn").value.trim();if(a)report(D[grp].name,"共同點："+a,0);st.ice=true;st.lastT=Date.now();save();$("ice").classList.add("hidden");render()};
 const TASKS=["任務：把 4 張卡按「事情發生的先後」，從最早排到最晚。密碼＝排好之後，卡片編號依序連起來（4 位數）。開口句型：我這張卡寫的是……，它發生在……之前／之後。","任務：5 張步驟卡裡有 1 張是錯的，先挑掉；剩下 4 張排成起身順序（說、放、傾、站）。把卡上的符號對照「符號表」換成數字，依序連起來（4 位數）。","任務：從 6 樣東西裡，找出 4 樣會讓她更容易出血或傷腎的。密碼＝這 4 樣的編號，由小到大（4 位數）。出院藥單在「阿嬤檔案」上。","任務：先聽二兒子的語音（下面可以播放），9 句話裡有 4 句和別人看到的不一樣。密碼＝這 4 句的編號，由小到大（4 位數）。注意：有一張證人卡只是在說心情。","任務：看圖，圈出 4 個會讓她跌倒的地方。密碼＝圈起來的 4 處旁邊的編號，由小到大（4 位數）。","任務：把鎖 1 到鎖 5 的密碼，各取「最後一位數字」，依序連成 5 位數。"];
 function taskUI(){$("task").textContent=TASKS[st.lock];if(st.lock===3){const a=document.createElement("audio");a.controls=true;a.preload="auto";a.src="son.mp3";a.style.cssText="width:100%;margin-top:8px";$("task").appendChild(a)}}
 function revCheck(){if(!st||st.lock>=6||$("play").classList.contains("hidden"))return;const late=Date.now()-st.lastT>480000;
