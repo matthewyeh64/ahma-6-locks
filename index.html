@@ -84,7 +84,8 @@ function setSync(){const n=qget().length;$("sync").textContent=n?"成績傳送�
 function h(s,seed){seed=seed||0;let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
 h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return ((4294967296*(2097151&h2)+(h1>>>0))%2176782336).toString(36)}
 let grp=-1,st=null;
-function fitTask(){const el=$("task");if(!el||el.offsetParent===null)return;let fs=Math.max(30,Math.min(72,Math.floor(innerWidth/14)));el.style.fontSize=fs+"px";let n=0;while(n++<45&&el.scrollHeight>el.clientHeight+2&&fs>16){fs-=2;el.style.fontSize=fs+"px"}}
+function fitH(el){/* 依「實際看得到的高度」決定大字框高度，讓下面的按鈕一定在畫面內（手機橫放、瀏覽器工具列會吃掉高度） */scrollTo(0,0);const vh=window.visualViewport?visualViewport.height:innerHeight;let b=0,x=el.nextElementSibling;while(x){if(x.offsetParent!==null){const cs=getComputedStyle(x);b+=x.getBoundingClientRect().height+parseFloat(cs.marginTop||0)+parseFloat(cs.marginBottom||0)}x=x.nextElementSibling}const h=Math.max(110,Math.floor(vh-el.getBoundingClientRect().top-b-14));el.style.height=el.style.minHeight=el.style.maxHeight=h+"px"}
+function fitTask(){const el=$("task");if(!el||el.offsetParent===null)return;if(document.body.dataset.view==="task")fitH(el);let fs=Math.max(30,Math.min(72,Math.floor(innerWidth/14)));el.style.fontSize=fs+"px";let n=0;while(n++<45&&el.scrollHeight>el.clientHeight+2&&fs>16){fs-=2;el.style.fontSize=fs+"px"}}
 function setView(v){document.body.dataset.view=v;if(v==="task")setTimeout(fitTask,0);else{const c=$("code");if(c&&!c.disabled)setTimeout(()=>c.focus(),50)}}
 window.addEventListener("resize",()=>{if(document.body.dataset.view==="task")fitTask()});
 window.addEventListener("orientationchange",()=>setTimeout(()=>{if(document.body.dataset.view==="task")fitTask()},300));
@@ -132,7 +133,7 @@ function deck(k,a){if(!window[k]||!window[k].length)window[k]=a.slice().sort(()=
 const PQ=["你工作裡最有成就感的一個瞬間","一個你到現在還記得的病人或家屬","一件你今天想跟同事說謝謝的事","一次你覺得被同事救了一把的經驗","你的專業裡，有什麼是別的單位可能不知道的","一件你希望別的單位多了解你們的事","你剛入行時，最慌張的一次","你工作上最常聽到的一句話是什麼"];
 const QS=["今年過年，你最想吃的一道菜是什麼？","你家過年一定會有的一件事是什麼？","這一年，你最想謝謝的一位同事是誰？為什麼？","如果能帶一樣東西回家給阿嬤，你會帶什麼？","你在照顧別人時，最常說的一句話是什麼？","小時候過年，你最期待的是什麼？","最近一次讓你覺得「這份工作很值得」的時刻是什麼？","你覺得家裡最像「家」的味道是什麼？"];
 let iStep=0;
-function fitBig(){const p=document.querySelector(".ip:not(.hidden)");if(!p)return;const el=p.querySelector(".ibig");if(!el||el.offsetParent===null)return;let fs=Math.max(30,Math.min(96,Math.floor(innerWidth/9)));el.style.fontSize=fs+"px";let n=0;while(n++<60&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2)&&fs>18){fs-=2;el.style.fontSize=fs+"px"}}
+function fitBig(){const p=document.querySelector(".ip:not(.hidden)");if(!p)return;const el=p.querySelector(".ibig");if(!el||el.offsetParent===null)return;fitH(el);let fs=Math.max(30,Math.min(96,Math.floor(innerWidth/9)));el.style.fontSize=fs+"px";let n=0;while(n++<60&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2)&&fs>18){fs-=2;el.style.fontSize=fs+"px"}}
 function showIce(n){iStep=Math.max(0,Math.min(5,n));document.querySelectorAll(".ip").forEach(x=>x.classList.toggle("hidden",+x.dataset.s!==iStep));$("ihead").textContent="破冰　第 "+(iStep+1)+" / 6 步";if(iStep<=3)upd(iStep);setTimeout(fitBig,0)}
 const roundP=[0,0,0,0],BOXES=["ibig0","qbox","cbox","pbox"];
 function getN(){return parseInt($("np").value)||0}
@@ -144,7 +145,7 @@ function upd(s){const N=getN(),p=document.querySelector('.ip[data-s="'+s+'"]'),c
 function readyPass(s){const ps=document.querySelector('.ip[data-s="'+s+'"] .ipass');if(ps)ps.classList.remove("hidden")}
 document.querySelectorAll(".ipass").forEach(b=>b.onclick=()=>{const s=+b.closest(".ip").dataset.s;$("passov").classList.remove("hidden");$("passok").onclick=()=>{$("passov").classList.add("hidden");roundP[s]++;if(s>0&&roundP[s]<getN())$(BOXES[s]).textContent="輪到下一位了，按「抽一題」。";upd(s);setTimeout(fitBig,0)}});
 document.querySelectorAll(".inext").forEach(b=>b.onclick=()=>{if(iStep===0&&getN()<2){$("ierr").textContent="每桌 10 個人";return}$("ierr").textContent="";showIce(iStep+1)});$("np").oninput=()=>upd(0);document.querySelectorAll(".iback").forEach(b=>b.onclick=()=>showIce(iStep-1));
-window.addEventListener("resize",fitBig);
+window.addEventListener("resize",fitBig);if(window.visualViewport)visualViewport.addEventListener("resize",()=>{fitBig();try{fitTask()}catch(e){}});addEventListener("orientationchange",()=>setTimeout(()=>{fitBig();try{fitTask()}catch(e){}},300));
 function showStart(){if(!st.ice&&st.lock===0){$("ice").classList.remove("hidden");document.body.classList.add("iceing");showIce(0)}else render()}
 $("qbtn").onclick=()=>{const f=deck("_qd",QS);spin($("qbox"),QS,()=>{$("qbox").textContent=f;readyPass(1)},$("qbtn"))};
 $("pbtn").onclick=()=>{window._pn=(window._pn||0)+1;const f=deck("_pd",PQ);spin($("pbox"),PQ,()=>{$("pbox").innerHTML="<span><span style=\"font-size:.5em;color:#555\">請分享：</span><br><b>"+f+"</b></span>";readyPass(3)},$("pbtn"))};
