@@ -253,7 +253,7 @@ let FX=null;function fxRun(big){const c=$("fx"),d=window.devicePixelRatio||1;c.w
   x.clearRect(0,0,W,H);for(let i=P.length-1;i>=0;i--){const p=P[i];p.vy+=p.k==="fw"?0.06:0.25;p.vx*=0.985;p.vy*=p.k==="fw"?0.97:0.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life--;if(p.life<0||p.y>H+20){P.splice(i,1);continue}x.save();x.globalAlpha=p.k==="fw"?Math.min(1,p.life/40):1;x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;if(p.k==="fw"){x.beginPath();x.arc(0,0,p.s,0,7);x.fill()}else x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()}
   if(P.length||fired<plan.length)FX=requestAnimationFrame(step);else{x.clearRect(0,0,W,H);FX=null}})(t0)}
 function cheer(big){playCheer(big);try{navigator.vibrate&&navigator.vibrate(big?[120,60,120,60,300]:[80,40,80])}catch(e){}
- if(big){const g=$("gateov");g.classList.remove("hidden");[...g.querySelectorAll("*")].forEach(e=>{e.style.animation="none";void e.offsetHeight;e.style.animation=""});g.onclick=()=>{g.classList.add("hidden")};setTimeout(()=>g.classList.add("hidden"),9000)}
+ if(big){const g=$("gateov");g.classList.remove("hidden");[...g.querySelectorAll("*")].forEach(e=>{e.style.animation="none";void e.offsetHeight;e.style.animation=""});endPrime();g.onclick=()=>endStart();setTimeout(endStart,5200)}
  try{fxRun(big)}catch(e){}}
 </script>
 <div id="whl" class="gov hidden"><div class="mtop"><b>鎖 8　長照轉盤</b><span id="wstat">內圈轉到每個需要都對上最適合的服務</span><button class="gclose">關閉</button></div><div class="wbody"><svg id="wsvg" viewBox="-170 -170 340 340"></svg><div class="wside"><button id="wturn">↻ 轉一格</button><div id="wread"></div><div class="wnote">轉到哪裡都會出現數字，<br>只有全部配對正確的那一組才是密碼。<br>猜錯要等 30 秒喔！</div></div></div></div>
@@ -300,4 +300,22 @@ function dDone(){const box=$("ddone");box.innerHTML="<b>7 樣都找到了！</b>
 function darkOpen(){$("dark").classList.remove("hidden");if(st.mem14){dDone();return}$("ddone").classList.add("hidden");$("droom").classList.remove("hidden");DFOUND=[];DX=DY=-999;$("dtip").style.display="";
  $("ditems").innerHTML=DIT.map((x,i)=>'<div class="ditem" style="left:'+DPOS[i][0]+'%;top:'+DPOS[i][1]+'%"><i>'+x[0]+'</i>'+x[1]+'<br><em>編號 '+decN("m14",i)+'</em></div>').join("");setTimeout(dPaint,0)}
 </script>
-</body></html>
+<div id="endov" class="hidden"><video id="endvid" src="ending.mp4" playsinline webkit-playsinline preload="auto"></video><button id="endplay" class="hidden">▶ 看阿嬤回家</button><button id="endskip">跳過 ✕</button></div>
+<style>#endov{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;z-index:160;background:#000;display:flex;align-items:center;justify-content:center}#endov.hidden{display:none!important}
+#endvid{width:100%;height:100%;object-fit:contain;background:#000}#endskip{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:999px;padding:6px 14px;font-size:15px;width:auto!important;margin:0!important}
+#endplay{position:absolute;background:#e0a100;color:#3b2a1c;border:0;border-radius:16px;padding:16px 26px;font-size:26px;font-weight:900;width:auto!important;margin:0!important}#endplay.hidden{display:none!important}
+#endagain{display:block;margin:10px auto;background:#8a4b1f;color:#fff;border:0;border-radius:12px;padding:10px 18px;font-size:18px;font-weight:700;width:auto}</style>
+<script>
+/* 破關後：大門動畫 → 自動播結束影片（ending.mp4，手機用 720p） */
+let ENDGO=false;
+function endPrime(){/* 在按「送出」那一下先解鎖影片，之後才能帶聲音自動播（iPhone） */ENDGO=false;const v=$("endvid");try{v.muted=false;const p=v.play();if(p&&p.then)p.then(()=>{if(!ENDGO){v.pause();v.currentTime=0}}).catch(()=>{});else{v.pause()}}catch(e){}}
+function endStart(){if(ENDGO)return;ENDGO=true;$("gateov").classList.add("hidden");endShow()}
+function endShow(){const v=$("endvid"),o=$("endov");o.classList.remove("hidden");$("endplay").classList.add("hidden");try{v.currentTime=0}catch(e){}
+ const p=v.play();if(p&&p.catch)p.catch(()=>{$("endplay").classList.remove("hidden")})}
+function endHide(){const v=$("endvid");try{v.pause()}catch(e){}$("endov").classList.add("hidden")}
+$("endplay").onclick=e=>{e.stopPropagation();$("endplay").classList.add("hidden");$("endvid").play().catch(()=>{})};
+$("endskip").onclick=e=>{e.stopPropagation();endHide()};
+$("endvid").addEventListener("ended",endHide);
+$("endvid").addEventListener("error",()=>{if(!$("endov").classList.contains("hidden"))endHide()});
+(function(){const b=document.createElement("button");b.id="endagain";b.textContent="▶ 再看一次阿嬤回家";b.onclick=e=>{e.stopPropagation();ENDGO=true;endShow()};const d=$("done");if(d)d.insertBefore(b,d.children[1]||null)})();
+</script></body></html>
